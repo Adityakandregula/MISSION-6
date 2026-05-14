@@ -1,0 +1,34 @@
+name: Build and publish GitHub Pages docs
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm run build
+      - run: |
+          rm -rf docs
+          mv dist docs
+          echo '' > docs/.nojekyll
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: 'chore: update docs deployment'
+          author_name: 'github-actions[bot]'
+          author_email: '41898282+github-actions[bot]@users.noreply.github.com'
+          add: 'docs'
+          push: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
